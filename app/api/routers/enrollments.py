@@ -1,12 +1,13 @@
+
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Optional
 from uuid import UUID
-
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from app.db.session import get_session
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.age_group import AgeGroup
+from app.schemas.enrollment_schema import EnrollmentBase
 
 router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
 
@@ -78,3 +79,22 @@ async def delete_enrollment(
         raise HTTPException(status_code=404, detail="Enrollment not found")
     await session.delete(enrollment)
     await session.commit()
+
+
+# PUT endpoint para atualização completa
+@router.put("/{enrollment_id}", response_model=Enrollment)
+async def update_enrollment(
+    enrollment_id: UUID,
+    enrollment_update: EnrollmentBase,
+    session: AsyncSession = Depends(get_session)
+) -> Enrollment:
+    enrollment = await session.get(Enrollment, enrollment_id)
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+    update_data = enrollment_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(enrollment, key, value)
+    session.add(enrollment)
+    await session.commit()
+    await session.refresh(enrollment)
+    return enrollment

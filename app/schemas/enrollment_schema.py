@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
-from models.enrollment import EnrollmentStatus
+from app.models.enrollment import EnrollmentStatus
 
 class EnrollmentBase(BaseModel):
     name: str = Field(..., description="Nome completo do inscrito")

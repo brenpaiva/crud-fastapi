@@ -1,11 +1,12 @@
+
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List
 from uuid import UUID
-
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from app.db.session import get_session
 from app.models.age_group import AgeGroup
+from app.schemas.age_group_schema import AgeGroupUpdate
 
 router = APIRouter(prefix="/age-groups", tags=["Age Groups"])
 
@@ -46,3 +47,22 @@ async def delete_age_group(
         raise HTTPException(status_code=404, detail="Age group not found")
     await session.delete(age_group)
     await session.commit()
+
+
+# PUT endpoint para atualização completa
+@router.put("/{age_group_id}", response_model=AgeGroup)
+async def update_age_group(
+    age_group_id: UUID,
+    age_group_update: AgeGroupUpdate,
+    session: AsyncSession = Depends(get_session)
+) -> AgeGroup:
+    age_group = await session.get(AgeGroup, age_group_id)
+    if not age_group:
+        raise HTTPException(status_code=404, detail="Age group not found")
+    update_data = age_group_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(age_group, key, value)
+    session.add(age_group)
+    await session.commit()
+    await session.refresh(age_group)
+    return age_group
