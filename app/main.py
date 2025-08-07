@@ -1,4 +1,3 @@
-
 import os
 from fastapi import FastAPI
 
@@ -27,6 +26,7 @@ def create_app() -> FastAPI:
     app.include_router(age_groups_router)
     app.include_router(enrollments_router)
 
+
     # Rota principal
     @app.get("/", tags=["root"])
     async def root():
@@ -41,7 +41,6 @@ def create_app() -> FastAPI:
     async def health_check():
         """Verifica conexão com o banco de dados e fila"""
         try:
-          
             async with engine.connect() as conn:
                 await conn.execute("SELECT 1")
             return {"status": "ok"}
