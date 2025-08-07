@@ -7,13 +7,15 @@ from sqlmodel import select
 from app.db.session import get_session
 from app.models.age_group import AgeGroup
 from app.schemas.age_group_schema import AgeGroupUpdate
+from app.core.security import get_current_user
 
 router = APIRouter(prefix="/age-groups", tags=["Age Groups"])
 
 @router.post("/", response_model=AgeGroup, status_code=status.HTTP_201_CREATED)
 async def create_age_group(
     age_group: AgeGroup,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    user: str = Depends(get_current_user)
 ) -> AgeGroup:
     session.add(age_group)
     await session.commit()
@@ -40,7 +42,8 @@ async def get_age_group(
 @router.delete("/{age_group_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_age_group(
     age_group_id: UUID,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    user: str = Depends(get_current_user)
 ) -> None:
     age_group = await session.get(AgeGroup, age_group_id)
     if not age_group:
@@ -54,7 +57,8 @@ async def delete_age_group(
 async def update_age_group(
     age_group_id: UUID,
     age_group_update: AgeGroupUpdate,
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
+    user: str = Depends(get_current_user)
 ) -> AgeGroup:
     age_group = await session.get(AgeGroup, age_group_id)
     if not age_group:
