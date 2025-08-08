@@ -21,7 +21,7 @@ async def create_enrollment(
     user: str = Depends(get_current_user)
 ) -> Enrollment:
     # Persist inicial com status pending
-    db_enrollment = Enrollment(**enrollment.dict())
+    db_enrollment = Enrollment(**enrollment.model_dump())
     session.add(db_enrollment)
     await session.commit()
     await session.refresh(db_enrollment)
@@ -90,7 +90,7 @@ async def update_enrollment(
     enrollment = await session.get(Enrollment, enrollment_id)
     if not enrollment:
         raise HTTPException(status_code=404, detail="Enrollment not found")
-    update_data = enrollment_update.dict(exclude_unset=True)
+    update_data = enrollment_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(enrollment, key, value)
     session.add(enrollment)

@@ -63,7 +63,7 @@ async def update_age_group(
     age_group = await session.get(AgeGroup, age_group_id)
     if not age_group:
         raise HTTPException(status_code=404, detail="Age group not found")
-    update_data = age_group_update.dict(exclude_unset=True)
+    update_data = age_group_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(age_group, key, value)
     session.add(age_group)

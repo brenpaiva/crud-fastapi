@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 
 from app.db.session import engine, init_db
@@ -20,12 +21,22 @@ def create_app() -> FastAPI:
     # Configura logging estruturado
     configure_logging()
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):  # noqa: D401
+        logger.info("Application startup")
+        if os.getenv("INIT_DB", "false").lower() == "true":
+            logger.info("Initializing database schema")
+            await init_db()
+        yield
+        logger.info("Application shutdown")
+
     app = FastAPI(
         title="Event Enrollment API",
         version="1.0.0",
         openapi_url="/api/v1/openapi.json",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
     @app.post("/token", response_model=Token, tags=["auth"])
@@ -71,15 +82,6 @@ def create_app() -> FastAPI:
         except Exception as e:
             logger.error("Health check failed", error=str(e))
             return {"status": "error", "detail": str(e)}
-
-    # Evento de startup
-    @app.on_event("startup")
-    async def on_startup():
-        logger.info("Application startup")
-        # Cria tabelas no dev se variável INIT_DB estiver habilitada
-        if os.getenv("INIT_DB", "false").lower() == "true":
-            logger.info("Initializing database schema")
-            await init_db()
 
     return app
 

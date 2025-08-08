@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 from sqlmodel import SQLModel, Field, Relationship
@@ -28,7 +28,7 @@ class Enrollment(SQLModel, table=True):
         description="Status da inscrição"
     )
     requested_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(UTC),
         description="Timestamp da requisição de inscrição"
     )
     processed_at: Optional[datetime] = Field(

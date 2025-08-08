@@ -21,7 +21,7 @@ Limitações / Próximos passos:
 import asyncio
 import os
 import signal
-from datetime import datetime
+from datetime import datetime, UTC
 from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
 
@@ -73,7 +73,7 @@ async def process_batch(session: AsyncSession) -> int:
 		# Aplicar regras
 		new_status = apply_business_rules(enrollment)
 		enrollment.status = new_status
-		enrollment.processed_at = datetime.utcnow()
+		enrollment.processed_at = datetime.now(UTC)
 		session.add(enrollment)
 		processed += 1
 	if processed:
