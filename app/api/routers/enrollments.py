@@ -9,6 +9,7 @@ from app.db.session import get_session
 from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.models.age_group import AgeGroup
 from app.schemas.enrollment_schema import EnrollmentBase, EnrollmentCreate
+from app.queue.redis_backend import redis_queue
 from app.core.security import get_current_user
 
 router = APIRouter(prefix="/enrollments", tags=["Enrollments"])
@@ -19,22 +20,13 @@ async def create_enrollment(
     session: AsyncSession = Depends(get_session),
     user: str = Depends(get_current_user)
 ) -> Enrollment:
-    stmt = select(AgeGroup).where(
-        AgeGroup.min_age <= enrollment.age,
-        AgeGroup.max_age >= enrollment.age
-    )
-    result = await session.exec(stmt)
-    age_group = result.first()
-    if not age_group:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Age not within any defined group"
-        )
+    # Persist inicial com status pending
     db_enrollment = Enrollment(**enrollment.dict())
-    db_enrollment.age_group_id = age_group.id
     session.add(db_enrollment)
     await session.commit()
     await session.refresh(db_enrollment)
+    # Enfileira para processamento posterior
+    await redis_queue.enqueue({"enrollment_id": str(db_enrollment.id)})
     return db_enrollment
 
 @router.get("/", response_model=List[Enrollment])
