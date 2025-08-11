@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+*.log
+
+# VSCode
+.vscode/
+
+# Test/coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtualenv
+virtualenv/
+venv/
+# ENV/
+# .env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Migrations
+migrations/__pycache__/
+
+# Docker
+*.pid
+
+# Outros
+*.sqlite3
+*.db
+*.swp
+*.bak
+*.tmp
+
+# Ignore arquivos temporários do Windows
+~$*
+
+# Ignore arquivos de cache do pytest
+.pytest_cache/
+
+# Ignore arquivos de cache do mypy
+.mypy_cache/
+
+# Ignore arquivos de cache do coverage
+.coverage
+
+# Ignore arquivos de cache do pip
+pip-wheel-metadata/
+
+# Ignore arquivos de cache do black
+.cache/
+
+# Ignore arquivos de cache do isort
+__isort.cache/
